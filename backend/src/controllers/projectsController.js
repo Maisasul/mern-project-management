@@ -1,13 +1,31 @@
 import mongoose from "mongoose";
 import Project from "../models/Project.js";
+import Task from "../models/Task.js";
 
 export async function getAllProjects(req, res) {
   try {
     const projects = await Project.find().sort({ createdAt: -1});
 
+    const projectsWithSummary = await Promise.all(
+      projects.map(async (project) => {
+        const tasks = await Task.find({ projectId: project._id });
+
+        const summary = {
+          todo: tasks.filter((t) => t.status === "To Do").length,
+          inProgress: tasks.filter((t) => t.status === "In Progress").length,
+          done: tasks.filter((t) => t.status === "Done").length,
+        };
+
+        return {
+          ...project.toObject(),
+          summary,
+        };
+      })
+    );
+
     res.status(200).json({
       message: "Project fetched successfully",
-      projects
+      projects: projectsWithSummary
     });
 
   } catch (error) {
@@ -31,9 +49,17 @@ export async function getProjectById(req, res) {
       return res.status(404).json({message: "Project not found"});
     }
 
+    const tasks = await Task.find({ projectId: id });
+
+    const groupedTasks = {
+      todo: tasks.filter((t) => t.status === "To Do"),
+      inProgress: tasks.filter((t) => t.status === "In Progress"),
+      done: tasks.filter((t) => t.status === "Done"),
+    };
+
     res.status(200).json({
       message: "Project fetched successfully",
-      project
+      project: groupedTasks
     });
     
   } catch (error) {
