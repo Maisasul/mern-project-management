@@ -59,7 +59,8 @@ export async function getProjectById(req, res) {
 
     res.status(200).json({
       message: "Project fetched successfully",
-      project: groupedTasks
+      project: project,
+      tasks: groupedTasks
     });
     
   } catch (error) {
