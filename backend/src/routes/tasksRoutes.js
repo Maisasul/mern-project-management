@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/project/:projectId', getAllTasksByProject);
 router.get('/:id', getTaskById);
-router.post('/project/:projectId', createTask);
+router.post('/project/:projectId/tasks', createTask);
 router.put('/:id', updateTask);
 router.delete('/:id', deleteTask);
 
