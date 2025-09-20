@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
-import { createProject } from '../../api/api';
 
-const ProjectForm = ({ onSuccess, onClose }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+const ProjectForm = ({ onSave, onClose, initialData }) => {
+  const [name, setName] = useState(initialData?.name || "");
+  const [description, setDescription] = useState(initialData?.description || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -18,8 +17,7 @@ const ProjectForm = ({ onSuccess, onClose }) => {
 
     setLoading(true);
     try {
-      await createProject({name: name.trim(), description: description.trim() });
-      onSuccess();
+      await onSave({name: name.trim(), description: description.trim() });
       onClose();
     } catch(err) {
       console.error('Error creating project:', err);
@@ -29,9 +27,12 @@ const ProjectForm = ({ onSuccess, onClose }) => {
     }
   };
 
+  const formTitle = initialData ? 'Edit Project' : 'New Project';
+  const buttonText = initialData ? 'Save Changes' : 'Create';
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold">New Project</h2>
+      <h2 className="text-xl font-semibold">{formTitle}</h2>
 
       <div>
         <label className="block text-sm font-medium">Name</label>
@@ -60,7 +61,7 @@ const ProjectForm = ({ onSuccess, onClose }) => {
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         disabled={loading}
       >
-        {loading ? "Saving..." : "Create"}
+        {loading ? "Saving..." : buttonText}
       </button>
     </form>
   )

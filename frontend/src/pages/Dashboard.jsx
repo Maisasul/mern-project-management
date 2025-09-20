@@ -1,12 +1,12 @@
 import React from 'react'
 import { useEffect } from 'react';
 import { useState } from 'react'
-import { getAllProjects } from '../api/api';
+import { createProject, getAllProjects } from '../api/api';
 import Navbar from '../components/Navbar';
-import ProjectCard from '../components/projects/ProjectCard';
 import ProjectList from '../components/projects/ProjectList';
 import Modal from '../components/Modal';
 import ProjectForm from '../components/projects/ProjectForm';
+import { Plus } from 'lucide-react';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -24,6 +24,16 @@ const Dashboard = () => {
     }
   };
 
+  const handleCreateProject = async (formData) => {
+    try {
+      await createProject(formData);
+      fetchProjects(); // Re-fetch all projects after creating a new one
+    } catch (err) {
+      console.error('Error creating project:', err);
+      throw err; // re-throw to be caught by the form
+    }
+  };
+
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -35,8 +45,14 @@ const Dashboard = () => {
       {/* header */}
       <Navbar 
         title='Dashboard'
-        buttonText='Add Project'
-        onAdd={() => setIsModalOpen(true)}
+        actions={[
+          {
+            text: 'Add Project',
+            onClick: () => setIsModalOpen(true),
+            className: 'bg-blue-600 text-white hover:bg-blue-700',
+            icon: <Plus />
+          }
+        ]}
       />
       <div className='flex-1 overflow-y-auto bg-transparent'>
         <div className='p-6 space-y-6'>
@@ -49,7 +65,7 @@ const Dashboard = () => {
       </div>
        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ProjectForm
-          onSuccess={fetchProjects}
+          onSave={handleCreateProject}
           onClose={() => setIsModalOpen(false)}
         />
       </Modal>
