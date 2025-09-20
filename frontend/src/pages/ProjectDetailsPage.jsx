@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router';
-import { getAllTasksByProject, getProjectById } from '../api/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { 
+  getAllTasksByProject, 
+  getProjectById,  
+  deleteProject, 
+  updateProject, 
+  createTask,
+  deleteTask,
+  updateTask
+} from '../api/api';
 import TaskList from '../components/tasks/TaskList';
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import TaskForm from '../components/tasks/TaskForm';
 import { SquarePen, Trash } from 'lucide-react';
-import { deleteProject, updateProject } from '../api/api.js';
 import ProjectForm from '../components/projects/ProjectForm';
 
 const ProjectDetailsPage = () => {
@@ -20,6 +27,7 @@ const ProjectDetailsPage = () => {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
 
   // load project && tasks
   const fetchData = async () => {
@@ -41,6 +49,7 @@ const ProjectDetailsPage = () => {
     fetchData();
   }, [id]);
 
+  // project handlers 
   const handleUpdateProject = async (formData) => {
     try {
       await updateProject(id, formData);
@@ -61,6 +70,48 @@ const ProjectDetailsPage = () => {
       }
     }
   }; 
+
+  // task handlers 
+  const handleCreateTask = async (formData) => {
+    try {
+      await createTask(id, formData);
+      fetchData();
+    } catch(err) {
+      console.error('Error creating task:', err);
+    }
+  };
+
+  const handleUpdateTask = async (formData) => {
+    try {
+      await updateTask(editingTask._id, formData);
+      setEditingTask(null);
+      fetchData(); // Re-fetch all data
+    } catch (err) {
+      console.error('Error updating task:', err);
+      throw err;
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    if(window.confirm('Are you sure want to delete this task?This action cannot be undone.')) {
+      try {
+      await deleteTask(taskId);
+      fetchData();
+      } catch(err) {
+        console.error('Error creating task:', err);
+      }
+    }
+  };
+
+  const handleOpenTaskModal = (task = null) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleCloseTaskModal = () => {
+    setEditingTask(null);
+    setIsTaskModalOpen(false);
+  };
 
   if (loading) return <p>Loading...</p>;
   if (!project) return <p>Project not found!</p>;
@@ -95,23 +146,23 @@ const ProjectDetailsPage = () => {
           title="To Do"
           color="text-blue-600"
           tasks={todoTasks}
-          onEdit={(task) => console.log("edit", task)}
-          onDelete={(id) => console.log("delete", id)}
-          onAdd={() => setIsTaskModalOpen(true)}
+          onEdit={handleOpenTaskModal}
+          onDelete={handleDeleteTask}
+          onAdd={() => handleOpenTaskModal()}
         />
         <TaskList
           title="In Progress"
           color="text-yellow-600"
           tasks={inProgressTasks}
-          onEdit={(task) => console.log("edit", task)}
-          onDelete={(id) => console.log("delete", id)}
+          onEdit={handleOpenTaskModal}
+          onDelete={handleDeleteTask}
         />
         <TaskList
           title="Done"
           color="text-green-600"
           tasks={doneTasks}
-          onEdit={(task) => console.log("edit", task)}
-          onDelete={(id) => console.log("delete", id)}
+          onEdit={handleOpenTaskModal}
+          onDelete={handleDeleteTask}
         />
       </div>
 
@@ -121,6 +172,15 @@ const ProjectDetailsPage = () => {
           onSave={handleUpdateProject}
           onClose={() => setIsEditModalOpen(false)}
           initialData={project} 
+        />
+      </Modal>
+
+      {/* Modal for task creation/editing */}
+      <Modal isOpen={isTaskModalOpen} onClose={handleCloseTaskModal}>
+        <TaskForm
+          onSave={editingTask ? handleUpdateTask : handleCreateTask}
+          onClose={handleCloseTaskModal}
+          initialData={editingTask}
         />
       </Modal>
     </div>
