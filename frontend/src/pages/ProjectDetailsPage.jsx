@@ -13,8 +13,10 @@ import TaskList from '../components/tasks/TaskList';
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import TaskForm from '../components/tasks/TaskForm';
-import { Clipboard, FolderKanban, LayoutGrid, SquarePen, Trash } from 'lucide-react';
+import { Clipboard, Flag, FolderKanban, LayoutGrid, SquarePen, Trash } from 'lucide-react';
 import ProjectForm from '../components/projects/ProjectForm';
+import toast from 'react-hot-toast';
+import ConfirmationDialog from '../components/ConfirmationDialog';
 
 const ProjectDetailsPage = () => {
   const {id} = useParams();
@@ -29,6 +31,10 @@ const ProjectDetailsPage = () => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
 
+  const [isConfirmProjectDeleteOpen, setIsConfirmProjectDeleteOpen] = useState(false);
+  const [isConfirmTaskDeleteOpen, setIsConfirmTaskDeleteOpen] = useState(false);
+  const [taskIdToDelete, setTaskIdToDelete] = useState(null);
+
   // load project && tasks
   const fetchData = async () => {
     try {
@@ -40,6 +46,7 @@ const ProjectDetailsPage = () => {
       setTasks(tasksRes.data.tasks || []);
     } catch (err) {
       console.error("Error fetching project details:", err);
+      toast.error("Failed to fetch  details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -53,55 +60,84 @@ const ProjectDetailsPage = () => {
   const handleUpdateProject = async (formData) => {
     try {
       await updateProject(id, formData);
+      toast.success('Project updated successfully!');
       setIsEditModalOpen(false);
       fetchData();
     } catch(err) {
       console.error('Error updating project:', err);
+      toast.error("Failed to update project. Please try again.");
     }
   }
 
-  const handleDeleteProject = async () => {
-    if(window.confirm('Are you sure want to delete this project?This action cannot be undone.')) {
-      try {
-        await deleteProject(id);
-        navigate('/');
-      } catch (err) {
-        console.error('Error deleting project:', err);
-      }
+  // const handleDeleteProject = async () => {
+  //   if(window.confirm('Are you sure want to delete this project?This action cannot be undone.')) {
+  //     try {
+  //       await deleteProject(id);
+  //       navigate('/');
+  //     } catch (err) {
+  //       console.error('Error deleting project:', err);
+  //     }
+  //   }
+  // }; 
+  const handleDeleteProject = () => {
+    setIsConfirmProjectDeleteOpen(true);
+  };
+
+  const confirmDeleteProject = async () => {
+    try {
+      await deleteProject(id);
+      setIsConfirmProjectDeleteOpen(false);
+      toast.success('Project delted successfully!');
+      navigate('/');
+    } catch(err) {
+      console.error('Error deleting project:', err);
+      toast.error('Failed to delete project. Please try again.');
     }
-  }; 
+  };
 
   // task handlers 
   const handleCreateTask = async (formData) => {
     try {
       await createTask(id, formData);
+      toast.success('Task created successfully!');
       fetchData();
     } catch(err) {
       console.error('Error creating task:', err);
+      toast.error("Failed to create task. Please try again.");
     }
   };
 
   const handleUpdateTask = async (formData) => {
     try {
       await updateTask(editingTask._id, formData);
+      toast.success('Task updated successfully!');
       setEditingTask(null);
-      fetchData(); // Re-fetch all data
+      fetchData(); 
     } catch (err) {
       console.error('Error updating task:', err);
+      toast.error("Failed to update task. Please try again.");
       throw err;
     }
   };
 
   const handleDeleteTask = async (taskId) => {
-    if(window.confirm('Are you sure want to delete this task?This action cannot be undone.')) {
-      try {
-      await deleteTask(taskId);
-      fetchData();
-      } catch(err) {
-        console.error('Error creating task:', err);
-      }
-    }
+    setTaskIdToDelete(taskId);
+    setIsConfirmTaskDeleteOpen(true);
   };
+
+  const confirmDeleteTask = async () => {
+    if(!taskIdToDelete) return;
+    try {
+      await deleteTask(taskIdToDelete);
+      setIsConfirmTaskDeleteOpen(false);
+      setTaskIdToDelete(null);
+      fetchData();
+      toast.success('Task deleted successfully!');
+    } catch(err) {
+      console.error('Error deleting task:', err);
+      toast.error('Failed to delete task. Please try again.');
+    }
+  }
 
   const handleOpenTaskModal = (task = null) => {
     setEditingTask(task);
@@ -187,8 +223,27 @@ const ProjectDetailsPage = () => {
           initialData={editingTask}
         />
       </Modal>
-    </div>
 
+      {/* Confirmation Modal for Project Delete */}
+      <Modal isOpen={isConfirmProjectDeleteOpen} onClose={() => setIsConfirmProjectDeleteOpen(false)}>
+        <ConfirmationDialog 
+          message="Are you sure you want to delete this project? This action cannot be undone."
+          onConfirm={confirmDeleteProject}
+          onCancel={() => setIsConfirmProjectDeleteOpen(false)}
+          confirmText="Delete Project"
+        />
+      </Modal>
+
+      {/* Confirmation Modal for Task Delete */}
+      <Modal isOpen={isConfirmTaskDeleteOpen} onClose={() => setIsConfirmTaskDeleteOpen(false)}>
+        <ConfirmationDialog 
+          message="Are you sure you want to delete this task? This action cannot be undone."
+          onConfirm={confirmDeleteTask}
+          onCancel={() => setIsConfirmTaskDeleteOpen(false)}
+          confirmText="Delete Task"
+        />
+      </Modal>
+    </div>
   )
 }
 

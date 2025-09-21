@@ -7,6 +7,7 @@ import ProjectList from '../components/projects/ProjectList';
 import Modal from '../components/Modal';
 import ProjectForm from '../components/projects/ProjectForm';
 import { Plus, Zap } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -19,6 +20,7 @@ const Dashboard = () => {
       setProjects(res.data.projects || []);
     } catch (err) {
       console.error("Error fetching projects:", err);
+      toast.error("Failed to fetch projects. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -27,10 +29,12 @@ const Dashboard = () => {
   const handleCreateProject = async (formData) => {
     try {
       await createProject(formData);
-      fetchProjects(); // Re-fetch all projects after creating a new one
+      toast.success('Project created successfully!');
+      fetchProjects(); 
     } catch (err) {
       console.error('Error creating project:', err);
-      throw err; // re-throw to be caught by the form
+      toast.error("Failed to create project. Please try again.");
+      throw err; 
     }
   };
 
