@@ -13,7 +13,7 @@ import TaskList from '../components/tasks/TaskList';
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import TaskForm from '../components/tasks/TaskForm';
-import { SquarePen, Trash } from 'lucide-react';
+import { Clipboard, FolderKanban, LayoutGrid, SquarePen, Trash } from 'lucide-react';
 import ProjectForm from '../components/projects/ProjectForm';
 
 const ProjectDetailsPage = () => {
@@ -122,19 +122,23 @@ const ProjectDetailsPage = () => {
   const doneTasks = tasks.filter((t) => t.status.toLowerCase() === "done".toLowerCase());
 
   return (
-    <div className="p-6">
+    <div>
       <Navbar
         title={project.name}
+        icon={<Clipboard size={25} className='text-white' />}
+        iconBgColor='bg-indigo-600'
         actions={[
           { 
-            text: <SquarePen /> , 
+            text: 'Edit', 
+            icon: <SquarePen size={18}/>,
             onClick: () => setIsEditModalOpen(true),
-            className: 'bg-blue-600 text-white hover:bg-blue-700' 
+            className: 'text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white' 
           },
           { 
-            text: <Trash />, 
+            text: 'Delete', 
+            icon: <Trash size={18}/>, 
             onClick: handleDeleteProject,
-            className: 'bg-red-600 text-white hover:bg-red-700' 
+            className: 'text-red-600 border border-red-600 hover:bg-red-600 hover:text-white' 
           },
         ]}
       />

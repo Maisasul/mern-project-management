@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import ProjectList from '../components/projects/ProjectList';
 import Modal from '../components/Modal';
 import ProjectForm from '../components/projects/ProjectForm';
-import { Plus } from 'lucide-react';
+import { Plus, Zap } from 'lucide-react';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -45,11 +45,13 @@ const Dashboard = () => {
       {/* header */}
       <Navbar 
         title='Dashboard'
+        icon={<Zap size={32} className='text-white' />}
+        iconBgColor='bg-green-600'
         actions={[
           {
             text: 'Add Project',
             onClick: () => setIsModalOpen(true),
-            className: 'bg-blue-600 text-white hover:bg-blue-700',
+            className: 'bg-green-600 text-white hover:bg-green-700',
             icon: <Plus />
           }
         ]}
