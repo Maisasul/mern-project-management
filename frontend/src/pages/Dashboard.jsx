@@ -8,6 +8,8 @@ import Modal from '../components/Modal';
 import ProjectForm from '../components/projects/ProjectForm';
 import { Plus, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
+import EmptyState from '../components/EmptyState';
+import emptyProjectImg from '../assets/images/emptyProject.svg';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -63,7 +65,19 @@ const Dashboard = () => {
       <div className='flex-1 overflow-y-auto bg-transparent'>
         <div className='p-6 space-y-6'>
           {projects.length === 0 ? (
-            <p>No projects found.</p>
+            <EmptyState 
+              image={emptyProjectImg}
+              title='No projects yet'
+              message='Start by creating your first project!'
+              action={
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className='flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors'
+              >
+                <Plus /> Add Project
+              </button>
+              }
+            />
           ) : (
             <ProjectList projects={projects}/>
           )}

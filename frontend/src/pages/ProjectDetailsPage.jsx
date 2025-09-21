@@ -13,10 +13,12 @@ import TaskList from '../components/tasks/TaskList';
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import TaskForm from '../components/tasks/TaskForm';
-import { Clipboard, Flag, FolderKanban, LayoutGrid, SquarePen, Trash } from 'lucide-react';
+import { Clipboard, Flag, FolderKanban, LayoutGrid, Plus, SquarePen, Trash } from 'lucide-react';
 import ProjectForm from '../components/projects/ProjectForm';
 import toast from 'react-hot-toast';
 import ConfirmationDialog from '../components/ConfirmationDialog';
+import EmptyState from '../components/EmptyState';
+import emptyTaskImg from '../assets/images/emptyTask.svg';
 
 const ProjectDetailsPage = () => {
   const {id} = useParams();
@@ -180,31 +182,46 @@ const ProjectDetailsPage = () => {
       />
       <p className='text-gray-600 mb-6'>{project.description}</p>
 
-      {/* Kanban Board */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <TaskList
-          title="To Do"
-          color="text-blue-600"
-          tasks={todoTasks}
-          onEdit={handleOpenTaskModal}
-          onDelete={handleDeleteTask}
-          onAdd={() => handleOpenTaskModal()}
+      {tasks.length === 0 ? (
+        <EmptyState 
+          image={emptyTaskImg}
+          title="No tasks yet"
+          message="Start by creating your first task!"
+          action={
+            <button
+              onClick={() => handleOpenTaskModal()}
+              className='flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors'
+            >
+              <Plus size={18}/> Add Task
+            </button>
+          }
         />
-        <TaskList
-          title="In Progress"
-          color="text-yellow-600"
-          tasks={inProgressTasks}
-          onEdit={handleOpenTaskModal}
-          onDelete={handleDeleteTask}
-        />
-        <TaskList
-          title="Done"
-          color="text-green-600"
-          tasks={doneTasks}
-          onEdit={handleOpenTaskModal}
-          onDelete={handleDeleteTask}
-        />
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <TaskList
+            title="To Do"
+            color="text-blue-600"
+            tasks={todoTasks}
+            onEdit={handleOpenTaskModal}
+            onDelete={handleDeleteTask}
+            onAdd={() => handleOpenTaskModal()}
+          />
+          <TaskList
+            title="In Progress"
+            color="text-yellow-600"
+            tasks={inProgressTasks}
+            onEdit={handleOpenTaskModal}
+            onDelete={handleDeleteTask}
+          />
+          <TaskList
+            title="Done"
+            color="text-green-600"
+            tasks={doneTasks}
+            onEdit={handleOpenTaskModal}
+            onDelete={handleDeleteTask}
+          />
+        </div>
+      )}
 
       {/* Modal for Edit Project */}
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
