@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import EmptyState from '../components/EmptyState';
 import emptyTaskImg from '../assets/images/emptyTask.svg';
+import Loader from '../components/Loader';
 
 const ProjectDetailsPage = () => {
   const {id} = useParams();
@@ -151,7 +152,7 @@ const ProjectDetailsPage = () => {
     setIsTaskModalOpen(false);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loader />;
   if (!project) return <p>Project not found!</p>;
 
   // Filter tasks

@@ -10,6 +10,7 @@ import { Plus, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import EmptyState from '../components/EmptyState';
 import emptyProjectImg from '../assets/images/emptyProject.svg';
+import Loader from '../components/Loader';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
@@ -44,7 +45,7 @@ const Dashboard = () => {
     fetchProjects();
   }, []);
 
-  if (loading) return <p>Loading...</p>
+  if (loading) return <Loader />
 
   return (
     <div className='flex-1 flex flex-col overflow-hidden'>
