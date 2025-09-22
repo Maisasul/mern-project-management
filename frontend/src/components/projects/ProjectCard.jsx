@@ -36,15 +36,15 @@ const ProjectCard = ({ project }) => {
               <div className='flex items-center space-x-2 text-sm font-medium'>
                 <div className='flex items-center gap-2'>
                   <span className='w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center pb-0.5'>
-                    {summary.done}
+                    {summary.todo}
                   </span> 
-                  <span className='text-blue-600'>Done</span>  
+                  <span className='text-blue-600'>To Do</span>  
                 </div>
                 <div className='flex items-center gap-2'>
                   <span className='w-6 h-6 rounded-full bg-yellow-400 text-white flex items-center justify-center pb-0.5'>
-                    {summary.done}
+                    {summary.inProgress}
                   </span> 
-                  <span className='text-yellow-400'>Done</span>  
+                  <span className='text-yellow-400'>In Progress</span>  
                 </div>
                 <div className='flex items-center gap-2'>
                   <span className='w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center pb-0.5'>
