@@ -13,13 +13,15 @@ import TaskList from '../components/tasks/TaskList';
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import TaskForm from '../components/tasks/TaskForm';
-import { Clipboard, Flag, FolderKanban, LayoutGrid, Plus, SquarePen, Trash } from 'lucide-react';
+import { Clipboard,Plus, SquarePen, Trash } from 'lucide-react';
 import ProjectForm from '../components/projects/ProjectForm';
 import toast from 'react-hot-toast';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import EmptyState from '../components/EmptyState';
 import emptyTaskImg from '../assets/images/emptyTask.svg';
 import Loader from '../components/Loader';
+import Breadcrumb from '../components/Breadcrumb';
+import TruncatedText from '../components/TruncatedText';
 
 const ProjectDetailsPage = () => {
   const {id} = useParams();
@@ -72,16 +74,6 @@ const ProjectDetailsPage = () => {
     }
   }
 
-  // const handleDeleteProject = async () => {
-  //   if(window.confirm('Are you sure want to delete this project?This action cannot be undone.')) {
-  //     try {
-  //       await deleteProject(id);
-  //       navigate('/');
-  //     } catch (err) {
-  //       console.error('Error deleting project:', err);
-  //     }
-  //   }
-  // }; 
   const handleDeleteProject = () => {
     setIsConfirmProjectDeleteOpen(true);
   };
@@ -181,7 +173,20 @@ const ProjectDetailsPage = () => {
           },
         ]}
       />
-      <p className='text-gray-600 mb-6'>{project.description}</p>
+        <Breadcrumb 
+          items={[
+            {label: 'Dashboard', to: '/'},
+            {label: project.name}
+          ]}
+        />
+        <div className='py-3 px-2 my-4 mx-6'>
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Project Overview</h2>
+          <p className='text-gray-600  max-w-2xl'>
+            <TruncatedText 
+              text={project.description || 'No description provided.'} 
+            />
+          </p>
+        </div>
 
       {tasks.length === 0 ? (
         <EmptyState 
@@ -198,7 +203,7 @@ const ProjectDetailsPage = () => {
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-7 mx-6">
           <TaskList
             title="To Do"
             color="text-blue-600"
@@ -209,7 +214,7 @@ const ProjectDetailsPage = () => {
           />
           <TaskList
             title="In Progress"
-            color="text-yellow-600"
+            color="text-yellow-400"
             tasks={inProgressTasks}
             onEdit={handleOpenTaskModal}
             onDelete={handleDeleteTask}
