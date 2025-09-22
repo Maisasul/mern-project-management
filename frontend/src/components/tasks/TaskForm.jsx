@@ -33,38 +33,39 @@ const TaskForm = ({ onSave, onClose, initialData }) => {
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-4">
       <h2 className="text-2xl font-bold text-gray-800">{formTitle}</h2>
-      
+
       <div>
-        <label className="block text-sm font-medium text-gray-700">Title</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           maxLength={100}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="w-full border rounded p-2 mt-1"
           placeholder="Enter task title"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Description</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={500}
           rows="3"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
           placeholder="Enter task description"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700">Status</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 
+          text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
         >
           <option value="To Do">To Do</option>
           <option value="In Progress">In Progress</option>
@@ -74,18 +75,23 @@ const TaskForm = ({ onSave, onClose, initialData }) => {
 
       {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
 
-      <div className="flex justify-end gap-3 mt-4">
+      <div className="flex w-full gap-3 mt-4">
         <button
           type="button"
           onClick={onClose}
-          className="px-4 py-2 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-50"
+          className="flex-1 px-4 py-2 text-gray-600 bg-white rounded-md border border-gray-300 
+          hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 
+          transition-colors duration-200"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
+          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md 
+          hover:bg-blue-700 disabled:bg-blue-300 
+          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 
+          transition-colors duration-200"
         >
           {loading ? 'Saving...' : buttonText}
         </button>
