@@ -7,7 +7,7 @@ const TaskCard = ({task, onEdit, onDelete}) => {
       <div className='flex items-center justify-between'>
         <div className='flex-1 pr-4'>
           <h3 className='text-lg font-bold text-gray-800'>{task.title}</h3>
-          <p className='text-sm text-gray-500 mt-1'>{task.description}</p>
+          <p className='text-sm text-gray-500 mt-1 line-clamp-2'>{task.description}</p>
         </div>
         <div className='flex items-center gap-2'>
           <button 

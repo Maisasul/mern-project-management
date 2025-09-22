@@ -26,7 +26,7 @@ const ProjectCard = ({ project }) => {
             <p className='text-3xl font-bold text-slate-600 mb-2'>
               {project.name}
             </p>
-            <p className='text-sm font-md text-slate-600 mb-4'>
+            <p className='text-sm font-md text-slate-600 mb-4 line-clamp-2'>
               {project.description}
             </p>
             <p className="text-xs text-gray-400 mb-3">

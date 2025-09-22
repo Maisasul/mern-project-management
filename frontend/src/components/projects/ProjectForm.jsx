@@ -40,6 +40,7 @@ const ProjectForm = ({ onSave, onClose, initialData }) => {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          maxLength={100}
           className="w-full border rounded p-2 mt-1"
           placeholder="Enter project name"
           required
@@ -51,6 +52,8 @@ const ProjectForm = ({ onSave, onClose, initialData }) => {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          maxLength={500}
+          rows="3"
           className="w-full border rounded p-2 mt-1"
         />
       </div>

@@ -4,11 +4,15 @@ const taskSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true
+      required: true,
+      trim: true,
+      maxlength: 100
     },
     description: {
       type: String,
-      default: ''
+      default: '',
+      trim: true,
+      maxlength: 500
     },
     status: { 
       type: String, 

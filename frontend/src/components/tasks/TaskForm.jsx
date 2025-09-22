@@ -40,6 +40,7 @@ const TaskForm = ({ onSave, onClose, initialData }) => {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          maxLength={100}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           placeholder="Enter task title"
           required
@@ -51,6 +52,7 @@ const TaskForm = ({ onSave, onClose, initialData }) => {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          maxLength={500}
           rows="3"
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           placeholder="Enter task description"
