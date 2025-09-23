@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import Project from "../models/Project.js";
 import Task from "../models/Task.js";
+import { isValidObjectId } from "../utils/validation.js";
 
-export async function getAllProjects(req, res) {
+
+export async function getAllProjects(req, res, next) {
   try {
     const projects = await Project.find().sort({ createdAt: -1});
 
@@ -10,15 +12,13 @@ export async function getAllProjects(req, res) {
       projects.map(async (project) => {
         const tasks = await Task.find({ projectId: project._id });
 
-        const summary = {
-          todo: tasks.filter((t) => t.status === "To Do").length,
-          inProgress: tasks.filter((t) => t.status === "In Progress").length,
-          done: tasks.filter((t) => t.status === "Done").length,
-        };
-
         return {
           ...project.toObject(),
-          summary,
+          summary: {
+            todo: tasks.filter((t) => t.status === "To Do").length,
+            inProgress: tasks.filter((t) => t.status === "In Progress").length,
+            done: tasks.filter((t) => t.status === "Done").length,
+          },
         };
       })
     );
@@ -29,52 +29,45 @@ export async function getAllProjects(req, res) {
     });
 
   } catch (error) {
-    console.error("Error in getAllProjects controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error); 
   }
 }
 
-export async function getProjectById(req, res) {
+export async function getProjectById(req, res, next) {
   try {
     const {id} = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({message: "Invalid project ID format"});
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({message: "Invalid project ID"});
     }
 
     const project = await Project.findById(id);
-
     if(!project) {
       return res.status(404).json({message: "Project not found"});
     }
 
     const tasks = await Task.find({ projectId: id });
 
-    const groupedTasks = {
-      todo: tasks.filter((t) => t.status === "To Do"),
-      inProgress: tasks.filter((t) => t.status === "In Progress"),
-      done: tasks.filter((t) => t.status === "Done"),
-    };
-
     res.status(200).json({
       message: "Project fetched successfully",
-      project: project,
-      tasks: groupedTasks
+      project: project.toObject(),
+      tasks: {
+        todo: tasks.filter((t) => t.status === "To Do"),
+        inProgress: tasks.filter((t) => t.status === "In Progress"),
+        done: tasks.filter((t) => t.status === "Done"),
+      },
     });
     
   } catch (error) {
-    console.error("Error in getProjectById controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error);
   }
 }
 
-export async function createProject(req, res) {
+export async function createProject(req, res, next) {
   try {
     const {name, description} = req.body;
 
-    if(!name || name.trim() === "") {
+    if(!name?.trim()) {
       return res.status(400).json({ message: "Project name is required"});
     }
     
@@ -91,35 +84,30 @@ export async function createProject(req, res) {
     });
 
   } catch (error) {
-    console.error("Error in createProject controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error); 
   }
 }
 
-export async function updateProject(req, res) {
+export async function updateProject(req, res, next) {
   try {
     const {id} = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({message: "Invalid project ID format"});
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({message: "Invalid project ID"});
     }
 
-    const {name, description} = req.body;
+    const updates = {};
+    if (req.body.name) updates.name = req.body.name.trim();
+    if (req.body.description) updates.description = req.body.description.trim();
 
-    // if (!id) {
-    //   return res.status(400).json({message: "Project ID is required"});
-    // }
-
-    if (!name && !description) {
-      return res.status(400).json({message: "At least one field (name or description) is required"});
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "Nothing to update" });
     }
 
-    const updatedProject = await Project.findByIdAndUpdate(
-      id,
-      {name, description},
-      {new: true, runValidators: true}
-    );
+    const updatedProject = await Project.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedProject) {
       return res.status(404).json({message: "Project not found"});
@@ -131,22 +119,19 @@ export async function updateProject(req, res) {
     });
 
   } catch (error) {
-    console.error("Error in updatedProject controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error); 
   }
 }
 
-export async function deleteProject(req, res) {
+export async function deleteProject(req, res, next) {
   try {
     const {id} = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidObjectId(id)) {
       return res.status(400).json({message: "Invalid project ID"});
     }
 
     const removed = await Project.findByIdAndDelete(id);
-
     if(!removed) {
       return res.status(404).json({message: "Project not found"});
     } 
@@ -157,8 +142,6 @@ export async function deleteProject(req, res) {
     });
 
   } catch (error) {
-    console.error("Error in deleteProject controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error); 
   }
 }

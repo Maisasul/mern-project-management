@@ -1,18 +1,18 @@
 import mongoose from "mongoose";
 import Task from "../models/Task.js";
 import Project from "../models/Project.js";
+import { isValidObjectId, validStatuses } from "../utils/validation.js";
 
-const validStatuses = ['To Do', 'In Progress', 'Done'];
-
-export async function getAllTasksByProject(req, res) {
+// Get all tasks for a project
+export async function getAllTasksByProject(req, res, next) {
   try {
-    const {projectId} = req.params;
+    const { projectId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(projectId)) {
-      return res.status(400).json({message: "Invalid project ID"});
+    if (!isValidObjectId(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" });
     }
 
-    const tasks = await Task.find({projectId}).sort({createdAt: -1});
+    const tasks = await Task.find({ projectId }).sort({ createdAt: -1 });
 
     res.status(200).json({
       message: "Tasks fetched successfully",
@@ -20,18 +20,16 @@ export async function getAllTasksByProject(req, res) {
     });
 
   } catch (error) {
-    console.error("Error in getAllTasksByProject controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error);
   }
 }
 
-export async function getTaskById(req, res) {
+export async function getTaskById(req, res, next) {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({message: "Invalid Task ID"});
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid Task ID" });
     }
 
     const task = await Task.findById(id);
@@ -40,35 +38,33 @@ export async function getTaskById(req, res) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    res.status(200).json(task);
+    res.status(200).json({ message: "Taskfetched successfully", task });
 
   } catch (error) {
-    console.error("Error in getTaskById controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error);
   }
 }
 
-export async function createTask(req,res) {
+export async function createTask(req, res, next) {
   try {
-    const {projectId} = req.params;
-    const {title, description, status} = req.body;
+    const { projectId } = req.params;
+    const { title, description, status } = req.body;
 
-    if(!mongoose.Types.ObjectId.isValid(projectId)) {
-      return res.status(400).json({message: "Invalid project ID"});
+    if (!isValidObjectId(projectId)) {
+      return res.status(400).json({ message: "Invalid project ID" });
     }
 
     const project = await Project.findById(projectId);
-    if(!project) {
-      return res.status(404).json({message: "Project not found"});
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
     }
 
-    if(!title || title.trim() === "") {
-      return res.status(400).json({message: "Task title is required"});
+    if (!title?.trim()) {
+      return res.status(400).json({ message: "Task title is required" });
     }
 
-    if(status && !validStatuses.includes(status)) {
-      return res.status(400).json({message: "Invalid task status provided"});
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid task status provided" });
     }
 
     const newTask = new Task({
@@ -81,83 +77,77 @@ export async function createTask(req,res) {
     const savedTask = await newTask.save();
 
     res.status(201).json({
-      message:"Task created successfully",
-      task: savedTask 
+      message: "Task created successfully",
+      task: savedTask
     });
 
   } catch (error) {
-    console.error("Error in createTask controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error);
   }
 }
 
 export async function updateTask(req, res) {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
+    const { title, description, status } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({message: "Invalid Task ID"});
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid Task ID" });
     }
 
-    const {title, description, status} = req.body;
-
-    if (!title && !description && !status) {
-      return res.status(400).json({message: "At least one field is required to update"});
+    const updates = {};
+    if (title?.trim()) updates.title = title.trim();
+    if (description?.trim()) updates.description = description.trim();
+    if (status) {
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid task status" });
+      }
+      updates.status = status;
     }
 
-    if(status && !validStatuses.includes(status)) {
-      return res.status(400).json({message: "Invalid task status provided"})
+    if(Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "Nothing to update" });
     }
 
-    const updateData = {};
-    if (title) updateData.title = title.trim();
-    if (description) updateData.description = description.trim();
-    if (status) updateData.status = status;
-
-    const updatedTask = await Task.findByIdAndUpdate(
-      id,
-      updateData,
-      {new: true, runValidators: true}
-    );
+    const updatedTask = await Task.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updatedTask) {
-      return res.status(404).json({message: "Task not found"});
+      return res.status(404).json({ message: "Task not found" });
     }
 
-    res.status(200).json({
-      message:"Task updated successfully",
-      task: updatedTask 
+    return res.status(200).json({
+      message: "Task updated successfully",
+      task: updatedTask,
     });
 
   } catch (error) {
-    console.error("Error in updateTask controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error);
   }
 }
 
 export async function deleteTask(req, res) {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({message: "Invalid task ID"});
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid task ID" });
     }
 
     const removed = await Task.findByIdAndDelete(id);
 
-    if(!removed) {
-      return res.status(404).json({message: "Task not found"});
+    if (!removed) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
     res.status(200).json({
-      message: "Tasks deleted successfully"
+      message: "Tasks deleted successfully",
+      task: removed
     });
 
   } catch (error) {
-    console.error("Error in deleteTask controller", error);
-
-    res.status(500).json({message: 'Internal server error'});
+    next(error);
   }
 }
