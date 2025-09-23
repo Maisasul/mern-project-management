@@ -1,55 +1,27 @@
 import React from 'react'
-import { useEffect } from 'react';
-import { useState } from 'react'
-import { createProject, getAllProjects } from '../api/api';
 import Navbar from '../components/Navbar';
 import ProjectList from '../components/projects/ProjectList';
 import Modal from '../components/Modal';
 import ProjectForm from '../components/projects/ProjectForm';
 import { Plus, Zap } from 'lucide-react';
-import toast from 'react-hot-toast';
 import EmptyState from '../components/EmptyState';
 import emptyProjectImg from '../assets/images/emptyProject.svg';
 import Loader from '../components/Loader';
+import { useDashboard } from '../hooks/useDashboard';
 
 const Dashboard = () => {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const fetchProjects = async () => {
-    try {
-      const res = await getAllProjects();
-      setProjects(res.data.projects || []);
-    } catch (err) {
-      console.error("Error fetching projects:", err);
-      toast.error("Failed to fetch projects. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateProject = async (formData) => {
-    try {
-      await createProject(formData);
-      toast.success('Project created successfully!');
-      fetchProjects(); 
-    } catch (err) {
-      console.error('Error creating project:', err);
-      toast.error("Failed to create project. Please try again.");
-      throw err; 
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  const {
+    projects,
+    loading,
+    isModalOpen,
+    setIsModalOpen,
+    handleCreateProject
+  } = useDashboard();
 
   if (loading) return <Loader />
 
   return (
     <div className='flex-1 flex flex-col overflow-hidden'>
-      {/* header */}
       <Navbar 
         title='Dashboard'
         icon={<Zap size={32} className='text-white' />}

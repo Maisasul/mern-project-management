@@ -9,7 +9,7 @@ const TruncatedText = ({text, limit =100}) => {
   const displayText = expanded ? text : text.slice(0, limit) + (isLong ? "..." : "");
 
   return (
-    <div className='text-sm text-slate-600'>
+    <p className='text-sm text-slate-600'>
       {displayText}
       {isLong && (
         <button
@@ -19,7 +19,7 @@ const TruncatedText = ({text, limit =100}) => {
           {expanded ? 'view Less' : 'View More'}
         </button>
       )}
-    </div>
+    </p>
   )
 }
 

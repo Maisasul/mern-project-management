@@ -1,156 +1,49 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom';
+import React from 'react';
 import { 
-  getAllTasksByProject, 
-  getProjectById,  
-  deleteProject, 
-  updateProject, 
-  createTask,
-  deleteTask,
-  updateTask
-} from '../api/api';
+  Clipboard, Plus, SquarePen, Trash 
+} from 'lucide-react';
 import TaskList from '../components/tasks/TaskList';
 import Navbar from '../components/Navbar';
 import Modal from '../components/Modal';
 import TaskForm from '../components/tasks/TaskForm';
-import { Clipboard,Plus, SquarePen, Trash } from 'lucide-react';
 import ProjectForm from '../components/projects/ProjectForm';
-import toast from 'react-hot-toast';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 import EmptyState from '../components/EmptyState';
-import emptyTaskImg from '../assets/images/emptyTask.svg';
 import Loader from '../components/Loader';
 import Breadcrumb from '../components/Breadcrumb';
 import TruncatedText from '../components/TruncatedText';
+import emptyTaskImg from '../assets/images/emptyTask.svg';
+import { useProjectDetails } from '../hooks/useProjectDetails'; // Import the new hook
 
 const ProjectDetailsPage = () => {
-  const {id} = useParams();
-
-  const navigate =useNavigate();
-
-  const [project, setProject] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
-
-  const [isConfirmProjectDeleteOpen, setIsConfirmProjectDeleteOpen] = useState(false);
-  const [isConfirmTaskDeleteOpen, setIsConfirmTaskDeleteOpen] = useState(false);
-  const [taskIdToDelete, setTaskIdToDelete] = useState(null);
-
-  // load project && tasks
-  const fetchData = async () => {
-    try {
-      const [projectRes, tasksRes] = await Promise.all([
-        getProjectById(id),
-        getAllTasksByProject(id),
-      ]);
-      setProject(projectRes.data.project);
-      setTasks(tasksRes.data.tasks || []);
-    } catch (err) {
-      console.error("Error fetching project details:", err);
-      toast.error("Failed to fetch  details. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [id]);
-
-  // project handlers 
-  const handleUpdateProject = async (formData) => {
-    try {
-      await updateProject(id, formData);
-      toast.success('Project updated successfully!');
-      setIsEditModalOpen(false);
-      fetchData();
-    } catch(err) {
-      console.error('Error updating project:', err);
-      toast.error("Failed to update project. Please try again.");
-    }
-  }
-
-  const handleDeleteProject = () => {
-    setIsConfirmProjectDeleteOpen(true);
-  };
-
-  const confirmDeleteProject = async () => {
-    try {
-      await deleteProject(id);
-      setIsConfirmProjectDeleteOpen(false);
-      toast.success('Project delted successfully!');
-      navigate('/');
-    } catch(err) {
-      console.error('Error deleting project:', err);
-      toast.error('Failed to delete project. Please try again.');
-    }
-  };
-
-  // task handlers 
-  const handleCreateTask = async (formData) => {
-    try {
-      await createTask(id, formData);
-      toast.success('Task created successfully!');
-      fetchData();
-    } catch(err) {
-      console.error('Error creating task:', err);
-      toast.error("Failed to create task. Please try again.");
-    }
-  };
-
-  const handleUpdateTask = async (formData) => {
-    try {
-      await updateTask(editingTask._id, formData);
-      toast.success('Task updated successfully!');
-      setEditingTask(null);
-      fetchData(); 
-    } catch (err) {
-      console.error('Error updating task:', err);
-      toast.error("Failed to update task. Please try again.");
-      throw err;
-    }
-  };
-
-  const handleDeleteTask = async (taskId) => {
-    setTaskIdToDelete(taskId);
-    setIsConfirmTaskDeleteOpen(true);
-  };
-
-  const confirmDeleteTask = async () => {
-    if(!taskIdToDelete) return;
-    try {
-      await deleteTask(taskIdToDelete);
-      setIsConfirmTaskDeleteOpen(false);
-      setTaskIdToDelete(null);
-      fetchData();
-      toast.success('Task deleted successfully!');
-    } catch(err) {
-      console.error('Error deleting task:', err);
-      toast.error('Failed to delete task. Please try again.');
-    }
-  }
-
-  const handleOpenTaskModal = (task = null) => {
-    setEditingTask(task);
-    setIsTaskModalOpen(true);
-  };
-
-  const handleCloseTaskModal = () => {
-    setEditingTask(null);
-    setIsTaskModalOpen(false);
-  };
+  const {
+    loading,
+    project,
+    tasks,
+    todoTasks,
+    inProgressTasks,
+    doneTasks,
+    isEditModalOpen,
+    setIsEditModalOpen,
+    isTaskModalOpen,
+    handleCloseTaskModal,
+    editingTask,
+    handleUpdateProject,
+    handleDeleteProject,
+    confirmDeleteProject,
+    handleCreateTask,
+    handleUpdateTask,
+    handleDeleteTask,
+    confirmDeleteTask,
+    handleOpenTaskModal,
+    isConfirmProjectDeleteOpen,
+    setIsConfirmProjectDeleteOpen,
+    isConfirmTaskDeleteOpen,
+    setIsConfirmTaskDeleteOpen
+  } = useProjectDetails();
 
   if (loading) return <Loader />;
   if (!project) return <p>Project not found!</p>;
-
-  // Filter tasks
-  const todoTasks = tasks.filter((t) => t.status.toLowerCase() === "to do".toLowerCase());
-  const inProgressTasks = tasks.filter((t) => t.status.toLowerCase() === "in progress".toLowerCase());
-  const doneTasks = tasks.filter((t) => t.status.toLowerCase() === "done".toLowerCase());
 
   return (
     <div>
@@ -173,20 +66,20 @@ const ProjectDetailsPage = () => {
           },
         ]}
       />
-        <Breadcrumb 
-          items={[
-            {label: 'Dashboard', to: '/'},
-            {label: project.name}
-          ]}
-        />
-        <div className='py-3 px-2 my-4 mx-6'>
-          <h2 className="text-lg font-semibold text-gray-800 mb-2">Project Overview</h2>
-          <p className='text-gray-600  max-w-2xl'>
-            <TruncatedText 
-              text={project.description || 'No description provided.'} 
-            />
-          </p>
+      <Breadcrumb 
+        items={[
+          {label: 'Dashboard', to: '/'},
+          {label: project.name}
+        ]}
+      />
+      <div className='py-3 px-2 my-4 mx-6'>
+        <h2 className="text-lg font-semibold text-gray-800 mb-2">Project Overview</h2>
+        <div className='text-gray-600 max-w-2xl'>
+          <TruncatedText 
+            text={project.description || 'No description provided.'} 
+          />
         </div>
+      </div>
 
       {tasks.length === 0 ? (
         <EmptyState 
@@ -229,7 +122,7 @@ const ProjectDetailsPage = () => {
         </div>
       )}
 
-      {/* Modal for Edit Project */}
+      {/* Modals are rendered here */}
       <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
         <ProjectForm
           onSave={handleUpdateProject}
@@ -238,7 +131,6 @@ const ProjectDetailsPage = () => {
         />
       </Modal>
 
-      {/* Modal for task creation/editing */}
       <Modal isOpen={isTaskModalOpen} onClose={handleCloseTaskModal}>
         <TaskForm
           onSave={editingTask ? handleUpdateTask : handleCreateTask}
@@ -247,7 +139,6 @@ const ProjectDetailsPage = () => {
         />
       </Modal>
 
-      {/* Confirmation Modal for Project Delete */}
       <Modal isOpen={isConfirmProjectDeleteOpen} onClose={() => setIsConfirmProjectDeleteOpen(false)}>
         <ConfirmationDialog 
           message="Are you sure you want to delete this project? This action cannot be undone."
@@ -257,7 +148,6 @@ const ProjectDetailsPage = () => {
         />
       </Modal>
 
-      {/* Confirmation Modal for Task Delete */}
       <Modal isOpen={isConfirmTaskDeleteOpen} onClose={() => setIsConfirmTaskDeleteOpen(false)}>
         <ConfirmationDialog 
           message="Are you sure you want to delete this task? This action cannot be undone."
@@ -267,7 +157,7 @@ const ProjectDetailsPage = () => {
         />
       </Modal>
     </div>
-  )
-}
+  );
+};
 
-export default ProjectDetailsPage
+export default ProjectDetailsPage;

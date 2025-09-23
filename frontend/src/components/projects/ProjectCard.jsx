@@ -23,7 +23,7 @@ const ProjectCard = ({ project }) => {
       <div className='bg-white/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-200/50 hover:shadow-md hover:shadow-slate-400/20 transition-all duration-300 group'>
         <div className='flex items-start justify-between'>
           <div className='flex-1'>
-            <p className='text-3xl font-bold text-slate-600 mb-2'>
+            <p className='text-2xl font-bold text-slate-600 mb-2'>
               {project.name}
             </p>
             <p className='text-sm font-md text-slate-600 mb-4 line-clamp-2'>
