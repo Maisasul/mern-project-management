@@ -58,7 +58,7 @@ This application allows users to create and manage projects, add tasks, and orga
 ## 📸 Screenshots
 | Dashboard | Project Details |
 |-----------|-----------------|
-| ![Dashboard Screenshot](./screenshots/dashboard.png) | ![Project Details Screenshot](./screenshots/project_details.png) |
+| ![Dashboard Screenshot](./frontend/public/screenshots/dashboard.png) | ![Project Details Screenshot](./frontend/public/screenshots/project_details.png) |
 
 ---
 
